@@ -9,15 +9,32 @@ public data class Uri(
 ) {
     val host: String?
         inline get() = authority?.host
-
     val userInformation: String?
         inline get() = authority?.userInformation
-
     val port: Int?
         inline get() = authority?.port
 }
 
-public fun String.mapToUri(pathSeparatorRegex: Regex? = "/".toRegex()): Result<Uri> {
+public inline fun <reified Q : Query> Uri.modifyQuery(transformation: (Q?) -> Query?): Uri = when (query) {
+    null -> copy(query = transformation(query))
+    is Q -> copy(query = transformation(query))
+    else -> this
+}
+
+public fun Uri.modifyParameters(transformation: MutableMap<String, String>.() -> Unit): Uri {
+    return modifyQuery<Query.Parameters> { query ->
+        query.orEmpty()
+            .toMutableMap()
+            .apply(transformation)
+            .takeUnless { it.isEmpty() }
+            ?.let(Query::Parameters)
+    }
+}
+
+public fun String.mapToUri(
+    pathSeparatorRegex: Regex? = "/".toRegex(),
+    queryParser: (queryString: String) -> Query = String::asQuery,
+): Result<Uri> {
     val matchResult = parsingRegex.matchEntire(decoded())
     return matchResult?.groupValues
         ?.get(1)
@@ -41,7 +58,7 @@ public fun String.mapToUri(pathSeparatorRegex: Regex? = "/".toRegex()): Result<U
                     },
                 query = matchResult.groupValues[6]
                     .takeUnless { it.isEmpty() }
-                    ?.asQuery(),
+                    ?.let(queryParser),
                 fragment = matchResult.groupValues[7].takeUnless { it.isEmpty() },
             )
         }
@@ -73,7 +90,7 @@ public fun Uri.mapToString(
     path.joinTo(this, separator = pathSeparator.encoded(shouldEncode))
     if (query != null) {
         append('?')
-        append(query.value.encoded(shouldEncode))
+        append(query.raw.value.encoded(shouldEncode))
     }
     if (fragment != null) {
         append('#')

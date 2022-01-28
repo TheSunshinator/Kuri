@@ -2,25 +2,37 @@ package com.nuglif.kuri
 
 import kotlin.jvm.JvmInline
 
-@JvmInline
-public value class Query(public val value: String)
+public interface Query {
+    public val raw: Raw
 
-public fun String.asQuery(): Query = Query(this)
-public fun Query.mapToMap(
-    variableSeparator: Regex = "&".toRegex(),
-    valueSeparator: Regex = "=".toRegex(),
-): Map<String, String> {
-    return if (value.isEmpty()) emptyMap()
-    else value.decoded()
-        .splitToSequence(variableSeparator) // TODO Remove custom implementation when bumping Kotlin to 1.6
-        .associate { variableDefinition ->
-            valueSeparator.find(variableDefinition)
-                ?.range
-                ?.let { range -> variableDefinition.take(range.first) to variableDefinition.drop(range.last + 1) }
-                ?: (variableDefinition to "")
+    @JvmInline
+    public value class Raw(internal val value: String): Query {
+        override val raw: Raw
+            get() = this
+
+        public fun toParameters(variableSeparator: Regex, valueSeparator: Regex): Parameters {
+            return value.asParametersQuery(variableSeparator, valueSeparator)
         }
+
+        public fun toParameters(variableSeparator: String = "&", valueSeparator: String = "="): Parameters {
+            return toParameters(variableSeparator.toRegex(), valueSeparator.toRegex())
+        }
+    }
+    public class Parameters(
+        values: Map<String, String>,
+        private val variableSeparator: String = "&",
+        private val valueSeparator: String = "=",
+    ): Query, Map<String, String> by values {
+        override val raw: Raw by lazy {
+            entries.joinToString(separator = variableSeparator) { (parameterName, parameterValue) ->
+                "$parameterName$valueSeparator$parameterValue"
+            }
+                .let(::Raw)
+        }
+    }
 }
 
+// TODO Remove custom implementation when bumping Kotlin to 1.6
 private fun String.splitToSequence(separator: Regex): Sequence<String> = sequence {
     val separations = separator.findAll(this@splitToSequence)
         .mapTo(mutableListOf()) { it.range }
@@ -36,14 +48,24 @@ private fun String.splitToSequence(separator: Regex): Sequence<String> = sequenc
     }
 }
 
-public fun Map<String, String>.mapToQuery(
+public fun String.asQuery(): Query.Raw = Query.Raw(this)
+public fun String.asParametersQuery(variableSeparator: Regex, valueSeparator: Regex): Query.Parameters {
+    return takeUnless { it.isEmpty() }
+        ?.decoded()
+        ?.splitToSequence(variableSeparator)
+        ?.associate { variableDefinition ->
+            val parameters =  valueSeparator.split(variableDefinition, 2)
+            parameters.first() to parameters.getOrElse(1) { "" }
+        }
+        .orEmpty()
+        .let(Query::Parameters)
+}
+
+public fun String.asParametersQuery(variableSeparator: String = "&", valueSeparator: String = "="): Query.Parameters {
+    return asParametersQuery(variableSeparator.toRegex(), valueSeparator.toRegex())
+}
+
+public fun Map<String, String>.asQuery(
     variableSeparator: String = "&",
     valueSeparator: String = "=",
-    shouldEncode: Boolean = true,
-): Query {
-    return entries.joinToString(separator = variableSeparator) { (parameter, value) ->
-        "$parameter$valueSeparator$value"
-    }
-        .encoded(shouldEncode)
-        .asQuery()
-}
+): Query.Parameters = Query.Parameters(this, variableSeparator, valueSeparator)

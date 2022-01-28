@@ -10,20 +10,20 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldBeEmpty
 import kotlin.test.Test
 
-class MapToMapTest {
+class ToParametersTest {
     @Test
     fun givenEmptyQuery_thenReturnEmptyMap() {
-        "".asQuery().mapToMap() should beEmpty()
+        "".asQuery().toParameters() should beEmpty()
     }
 
     @Test
     fun givenQueryWithoutVariableSeparator_thenReturnSingleElement() {
-        "someVariable=someValue".asQuery().mapToMap() should haveSize(1)
+        "someVariable=someValue".asQuery().toParameters() should haveSize(1)
     }
 
     @Test
     fun givenQueryWithoutValueSeparator_thenReturnElementMappedToEmptyString() {
-        val result = "someVariable&someOtherValue".asQuery().mapToMap()
+        val result = "someVariable&someOtherValue".asQuery().toParameters()
         assertSoftly {
             result should haveSize(2)
             result shouldContain ("someVariable" to "")
@@ -34,7 +34,7 @@ class MapToMapTest {
     @Test
     fun givenQueryCustomSeparators_thenReturnElementMappedToProperValue() {
         val subject = "someVariable->someValue<>someOtherVariable>someOtherValue><someThirdVariable=>someThirdValue"
-        val result = subject.asQuery().mapToMap(
+        val result = subject.asQuery().toParameters(
             variableSeparator = "<>|><".toRegex(),
             valueSeparator = "[-=]?>".toRegex(),
         )
@@ -47,18 +47,17 @@ class MapToMapTest {
     }
 }
 
-class MapToQueryTest {
+class ToRawTest {
     @Test
     fun givenEmptyMap_thenReturnEmptyQuery() {
-        emptyMap<String, String>().mapToQuery().value.shouldBeEmpty()
+        emptyMap<String, String>().asQuery().raw.value.shouldBeEmpty()
     }
 
     @Test
     fun givenMap_thenReturnEachEntryJoined() {
-        val result = mapOf("a" to "1", "b" to "2", "" to "emptyKey", "emptyVariable" to "")
-            .mapToQuery(shouldEncode = false)
-            .value
-
-        result shouldBe "a=1&b=2&=emptyKey&emptyVariable="
+        mapOf("a" to "1", "b" to "2", "" to "emptyKey", "emptyVariable" to "")
+            .asQuery()
+            .raw
+            .value shouldBe "a=1&b=2&=emptyKey&emptyVariable="
     }
 }
