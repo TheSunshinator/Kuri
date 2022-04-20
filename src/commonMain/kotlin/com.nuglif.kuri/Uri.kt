@@ -66,14 +66,13 @@ public fun String.mapToUri(
 }
 
 private val parsingRegex = run {
-    val scheme = "[a-zA-Z][a-zA-Z0-9+.-]+?".toRegex()
-    val userInformation = "(?:[a-zA-Z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*?".toRegex()
-    val host = "(?:[a-zA-Z0-9-._~!$&'()*+,:;=\\[\\]]|%[0-9A-F]{2})*(?<!:\\d{0,6})".toRegex()
-    val port = "\\d*".toRegex()
-    val path = "(?:[a-zA-Z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*".toRegex()
-    val query = "(?:[a-zA-Z0-9-._~!\$&'()*+,;=:/?@]|%[0-9A-F]{2})*".toRegex()
-    val fragment = "(?:[a-zA-Z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*".toRegex()
-    "^($scheme):(?://(?:($userInformation)@)?($host)(?::($port))?)?($path)(?:\\?($query))?(?:#($fragment))?$".toRegex()
+    val userInformation = "(?:[a-zA-Z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*?"
+    val host = "(?:[a-zA-Z0-9-._~!$&'()*+,:;=\\[\\]]|%[0-9A-F]{2})*(?<!:\\d{0,6})"
+    val port = "\\d*"
+    val path = "(?:[a-zA-Z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*"
+    val query = "(?:[a-zA-Z0-9-._~!\$&'()*+,;=:/?@]|%[0-9A-F]{2})*"
+    val fragment = "(?:[a-zA-Z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*"
+    "^($scheme?):(?://(?:($userInformation)@)?($host)(?::($port))?)?($path)(?:\\?($query))?(?:#($fragment))?$".toRegex()
 }
 
 public fun Uri.mapToString(

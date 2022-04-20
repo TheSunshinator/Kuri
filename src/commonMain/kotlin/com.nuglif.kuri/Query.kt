@@ -32,22 +32,6 @@ public interface Query {
     }
 }
 
-// TODO Remove custom implementation when bumping Kotlin to 1.6
-private fun String.splitToSequence(separator: Regex): Sequence<String> = sequence {
-    val separations = separator.findAll(this@splitToSequence)
-        .mapTo(mutableListOf()) { it.range }
-    if (separations.isEmpty()) yield(this@splitToSequence)
-    else {
-        yield(this@splitToSequence.substring(0 until separations.first().first))
-        separations.asSequence()
-            .zipWithNext { previousSeparationRange, nextSeparationRange ->
-                this@splitToSequence.substring(previousSeparationRange.last + 1, nextSeparationRange.first)
-            }
-            .let { yieldAll(it) }
-        yield(this@splitToSequence.substring(separations.last().last + 1, this@splitToSequence.length))
-    }
-}
-
 public fun String.asQuery(): Query.Raw = Query.Raw(this)
 public fun String.asParametersQuery(variableSeparator: Regex, valueSeparator: Regex): Query.Parameters {
     return takeUnless { it.isEmpty() }

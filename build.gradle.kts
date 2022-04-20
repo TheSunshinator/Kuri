@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    kotlin("multiplatform") version "1.5.10"
+    kotlin("multiplatform") version "1.6.20"
     id("com.android.library")
     id("maven-publish")
 }
@@ -16,30 +18,30 @@ repositories {
 kotlin {
     explicitApi()
 
-    android {
-        publishLibraryVariants("release", "debug")
-    }
+    targets {
+        jvm()
 
-    js(BOTH) {
-        browser()
-        nodejs()
-    }
+        js(BOTH) {
+            browser()
+            nodejs()
+        }
 
-    jvm {
-        compilations.all { kotlinOptions.jvmTarget = "1.8" }
-        testRuns["test"].executionTask.configure { useJUnitPlatform() }
-    }
+        android()
 
-    iosX64("ios").binaries.framework {
-        baseName = rootProject.name
-    }
+        linuxX64()
+        mingwX64()
+        macosX64()
 
-    val hostOs = System.getProperty("os.name")
-    when {
-        hostOs == "Mac OS X" -> macosX64("native")
-        hostOs == "Linux" -> linuxX64("native")
-        hostOs.startsWith("Windows") -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+        tvos()
+
+        watchosArm32()
+        watchosArm64()
+        watchosX86()
+        watchosX64()
+
+        iosX64()
+        iosArm64()
+        iosArm32()
     }
 
     sourceSets {
@@ -56,5 +58,14 @@ android {
     defaultConfig {
         minSdkVersion(21)
         targetSdkVersion(31)
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+        jvmTarget = "1.8"
+        apiVersion = "1.6"
+        languageVersion = "1.6"
     }
 }

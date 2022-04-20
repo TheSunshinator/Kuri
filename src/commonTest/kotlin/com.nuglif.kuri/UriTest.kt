@@ -17,6 +17,12 @@ class MapToUriTest {
     }
 
     @Test
+    fun givenStringContainingValidUri_thenReturnFailure() {
+        " someScheme://someUser@someHost:42/some/path?someQuery#someFragment".mapToUri().isFailure shouldBe true
+        "someScheme://someUser@someHost:42/some/path?someQuery#someFragment ".mapToUri().isFailure shouldBe true
+    }
+
+    @Test
     fun givenInvalidScheme_thenReturnFailure() {
         "!validScheme:path".mapToUri().isFailure shouldBe true
     }
