@@ -1,4 +1,4 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 import kotlin.jvm.JvmInline
 
@@ -27,7 +27,7 @@ public interface Query {
             entries.joinToString(separator = variableSeparator) { (parameterName, parameterValue) ->
                 "$parameterName$valueSeparator$parameterValue"
             }
-                .let(::Raw)
+                .let(Query::Raw)
         }
     }
 }

@@ -1,8 +1,7 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.maps.beEmpty
-import io.kotest.matchers.maps.haveKey
 import io.kotest.matchers.maps.haveSize
 import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.should

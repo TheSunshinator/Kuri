@@ -1,4 +1,4 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 public data class Authority(
     val host: String,

@@ -1,4 +1,4 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe

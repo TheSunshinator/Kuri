@@ -1,4 +1,4 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldContainExactly

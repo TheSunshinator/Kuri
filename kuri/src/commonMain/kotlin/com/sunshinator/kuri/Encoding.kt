@@ -1,4 +1,4 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 internal fun String.encoded(shouldEncode: Boolean): String {
     return if (shouldEncode) encoded() else this
@@ -23,7 +23,6 @@ public fun String.encoded(): String = buildString {
 
 private val unreservedCharacters = "[a-zA-Z0-9-_.~]".toRegex()
 
-@OptIn(ExperimentalUnsignedTypes::class)
 public fun String.decoded(): String = encodedCharacters.replace(this) { match ->
     val bytes = match.value
         .splitToSequence('%')

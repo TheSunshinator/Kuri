@@ -1,4 +1,4 @@
-package com.nuglif.kuri
+package com.sunshinator.kuri
 
 import kotlin.jvm.JvmInline
 
@@ -7,7 +7,7 @@ public value class Scheme internal constructor(
     public val value: String,
 )
 
-internal val scheme = "[a-zA-Z][a-zA-Z0-9+.-]+"
+internal const val scheme = "[a-zA-Z][a-zA-Z0-9+.-]+"
 private val schemeRegex = "^$scheme$".toRegex()
 public fun String.asScheme(): Result<Scheme> {
     return if (this matches schemeRegex) Result.success(Scheme(this))
